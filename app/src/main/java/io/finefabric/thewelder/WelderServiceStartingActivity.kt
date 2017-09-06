@@ -12,6 +12,8 @@ class WelderServiceStartingActivity : AppCompatActivity() {
 
         val serviceIntent = Intent(applicationContext, AreYouAWelderYetService::class.java)
 
+        stopService(serviceIntent)
+
         startService(serviceIntent)
 
         finish()

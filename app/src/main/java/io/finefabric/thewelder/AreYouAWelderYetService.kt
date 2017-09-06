@@ -32,16 +32,27 @@ class AreYouAWelderYetService : Service() {
                 spawaczNotify()
             }
 
-        }, 0, AlarmManager.INTERVAL_DAY)
+        }, 0, 60000 * 60)
 
         val i = Intent(Intent.ACTION_SEND)
         i.type = "text/plain"
-        i.putExtra("jid", "XXX@s.whatsapp.net")
+        i.putExtra("jid", "447455806680@s.whatsapp.net")
         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        i.putExtra(Intent.EXTRA_TEXT, "jesteś już spawaczem?")
+        i.putExtra(Intent.EXTRA_TEXT, "Jesteś już spawaczem?")
         i.`package` = "com.whatsapp"
+        pendingIntent = PendingIntent.getActivity(this, Notification.FLAG_AUTO_CANCEL, i, 0)
 
-        pendingIntent = PendingIntent.getActivity(this, Notification.FLAG_ONGOING_EVENT, i, 0)
+        val notification = NotificationCompat.Builder(this)
+                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setSmallIcon(R.mipmap.ic_launcher).setOngoing(true)
+                .setCategory(NotificationCompat.CATEGORY_STATUS)
+                .setContentTitle("Spawacz service")
+                .build()
+
+        notification.flags = notification.flags or Notification.FLAG_ONGOING_EVENT
+
+        startForeground(SERVICE_ID, notification)
+
     }
 
     fun spawaczNotify() {
@@ -50,8 +61,7 @@ class AreYouAWelderYetService : Service() {
                 .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setSmallIcon(R.mipmap.ic_launcher).setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setStyle(NotificationCompat.BigTextStyle().bigText("pitek musi być spawaczę"))
-                .setContentTitle("Spawacz")
+                .setContentTitle("Napisz do pitka")
                 .setContentIntent(pendingIntent).build()
 
         val screenLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
@@ -67,7 +77,13 @@ class AreYouAWelderYetService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        onCreate()
         return START_STICKY
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        timer.cancel()
     }
 
     companion object {
